@@ -1,0 +1,400 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model alerta {
+  id_alerta                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mensagem                                                String?
+  estabelecimento                                         String?          @db.Uuid
+  estabelecimento_alerta_estabelecimentoToestabelecimento estabelecimento? @relation("alerta_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+}
+
+model area_entrega {
+  id_area_entrega                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  distancia_maxima                                              Decimal?         @db.Decimal
+  distancia_minima                                              Decimal?         @db.Decimal
+  valor                                                         Decimal?         @db.Decimal
+  estabelecimento                                               String?          @db.Uuid
+  estabelecimento_area_entrega_estabelecimentoToestabelecimento estabelecimento? @relation("area_entrega_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+}
+
+model aviso {
+  id_aviso                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mensagem                                               String?
+  estabelecimento                                        String?          @db.Uuid
+  tipo                                                   String?
+  status                                                 String?
+  estabelecimento_aviso_estabelecimentoToestabelecimento estabelecimento? @relation("aviso_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+}
+
+model carrinho_complemento {
+  id_carrinho_complemento                                                                          String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  carrinho_produto                                                                                 String?                      @db.Uuid
+  complemento_item                                                                                 String?                      @db.Uuid
+  complemento_tipo                                                                                 String?                      @db.Uuid
+  quantidade                                                                                       BigInt?
+  valor                                                                                            Decimal?                     @db.Decimal
+  carrinho_produto_carrinho_complemento_carrinho_produtoTocarrinho_produto                         carrinho_produto?            @relation("carrinho_complemento_carrinho_produtoTocarrinho_produto", fields: [carrinho_produto], references: [id_carrinho_produto], onDelete: NoAction)
+  complemento_item_carrinho_complemento_complemento_itemTocomplemento_item                         complemento_item?            @relation("carrinho_complemento_complemento_itemTocomplemento_item", fields: [complemento_item], references: [id_complemento_item], onDelete: NoAction)
+  complemento_tipo_carrinho_complemento_complemento_tipoTocomplemento_tipo                         complemento_tipo?            @relation("carrinho_complemento_complemento_tipoTocomplemento_tipo", fields: [complemento_tipo], references: [id_complemento_tipo], onDelete: NoAction)
+  lista_carrinho_complemento_lista_carrinho_complemento_carrinho_complementoTocarrinho_complemento lista_carrinho_complemento[] @relation("lista_carrinho_complemento_carrinho_complementoTocarrinho_complemento")
+}
+
+model carrinho_produto {
+  id_carrinho_produto                                                                      String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  atendente                                                                                String?                      @db.Uuid
+  obs                                                                                      String?
+  produto                                                                                  String?                      @db.Uuid
+  quantidade                                                                               BigInt?
+  valor_produto                                                                            Decimal?                     @db.Decimal
+  valor_total                                                                              Decimal?                     @db.Decimal
+  dar_baixa                                                                                String?                      @db.Uuid
+  salvo                                                                                    String?                      @db.Uuid
+  carrinho_complemento_carrinho_complemento_carrinho_produtoTocarrinho_produto             carrinho_complemento[]       @relation("carrinho_complemento_carrinho_produtoTocarrinho_produto")
+  usuario                                                                                  usuario?                     @relation(fields: [atendente], references: [id_usuario], onDelete: NoAction)
+  dominio_carrinho_produto_dar_baixaTodominio                                              dominio?                     @relation("carrinho_produto_dar_baixaTodominio", fields: [dar_baixa], references: [id_dominio], onDelete: NoAction)
+  produto_carrinho_produto_produtoToproduto                                                produto?                     @relation("carrinho_produto_produtoToproduto", fields: [produto], references: [id_produto], onDelete: NoAction)
+  dominio_carrinho_produto_salvoTodominio                                                  dominio?                     @relation("carrinho_produto_salvoTodominio", fields: [salvo], references: [id_dominio], onDelete: NoAction)
+  lista_carrinho_complemento_lista_carrinho_complemento_carrinho_produtoTocarrinho_produto lista_carrinho_complemento[] @relation("lista_carrinho_complemento_carrinho_produtoTocarrinho_produto")
+  lista_carrinho_produto_lista_carrinho_produto_carrinho_produtoTocarrinho_produto         lista_carrinho_produto[]     @relation("lista_carrinho_produto_carrinho_produtoTocarrinho_produto")
+}
+
+model categoria {
+  id_categoria                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deletado                                                   String?          @db.Uuid
+  destaque                                                   String?          @db.Uuid
+  estabelecimento                                            String?          @db.Uuid
+  nome                                                       String?
+  tipo_categoria                                             String?          @db.Uuid
+  dominio_categoria_deletadoTodominio                        dominio?         @relation("categoria_deletadoTodominio", fields: [deletado], references: [id_dominio], onDelete: NoAction)
+  dominio_categoria_destaqueTodominio                        dominio?         @relation("categoria_destaqueTodominio", fields: [destaque], references: [id_dominio], onDelete: NoAction)
+  estabelecimento_categoria_estabelecimentoToestabelecimento estabelecimento? @relation("categoria_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  tipo_categoria_categoria_tipo_categoriaTotipo_categoria    tipo_categoria?  @relation("categoria_tipo_categoriaTotipo_categoria", fields: [tipo_categoria], references: [id_tipo_categoria], onDelete: NoAction)
+  produto_produto_categoriaTocategoria                       produto[]        @relation("produto_categoriaTocategoria")
+}
+
+model complemento_item {
+  id_complemento_item                                                              String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  complemento_tipo                                                                 String?                  @db.Uuid
+  deletado                                                                         String?                  @db.Uuid
+  descricao                                                                        String?
+  nome                                                                             String?
+  valor                                                                            Decimal?                 @db.Decimal
+  carrinho_complemento_carrinho_complemento_complemento_itemTocomplemento_item     carrinho_complemento[]   @relation("carrinho_complemento_complemento_itemTocomplemento_item")
+  complemento_tipo_complemento_item_complemento_tipoTocomplemento_tipo             complemento_tipo?        @relation("complemento_item_complemento_tipoTocomplemento_tipo", fields: [complemento_tipo], references: [id_complemento_tipo], onDelete: NoAction)
+  dominio                                                                          dominio?                 @relation(fields: [deletado], references: [id_dominio], onDelete: NoAction)
+  lista_complemento_item_lista_complemento_item_complemento_itemTocomplemento_item lista_complemento_item[] @relation("lista_complemento_item_complemento_itemTocomplemento_item")
+}
+
+model complemento_tipo {
+  id_complemento_tipo                                                                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  deletado                                                                                String?                  @db.Uuid
+  lista_complemento_itens                                                                 String?                  @db.Uuid
+  nome                                                                                    String?
+  obrigatorio                                                                             String?                  @db.Uuid
+  produto                                                                                 String?                  @db.Uuid
+  quantidade_maxima                                                                       BigInt?
+  quantidade_minima                                                                       BigInt?
+  carrinho_complemento_carrinho_complemento_complemento_tipoTocomplemento_tipo            carrinho_complemento[]   @relation("carrinho_complemento_complemento_tipoTocomplemento_tipo")
+  complemento_item_complemento_item_complemento_tipoTocomplemento_tipo                    complemento_item[]       @relation("complemento_item_complemento_tipoTocomplemento_tipo")
+  dominio_complemento_tipo_deletadoTodominio                                              dominio?                 @relation("complemento_tipo_deletadoTodominio", fields: [deletado], references: [id_dominio], onDelete: NoAction)
+  lista_complemento_item_complemento_tipo_lista_complemento_itensTolista_complemento_item lista_complemento_item?  @relation("complemento_tipo_lista_complemento_itensTolista_complemento_item", fields: [lista_complemento_itens], references: [id_lista_complemento_item], onDelete: NoAction)
+  dominio_complemento_tipo_obrigatorioTodominio                                           dominio?                 @relation("complemento_tipo_obrigatorioTodominio", fields: [obrigatorio], references: [id_dominio], onDelete: NoAction)
+  produto_complemento_tipo_produtoToproduto                                               produto?                 @relation("complemento_tipo_produtoToproduto", fields: [produto], references: [id_produto], onDelete: NoAction)
+  lista_complemento_item_lista_complemento_item_complemento_tipoTocomplemento_tipo        lista_complemento_item[] @relation("lista_complemento_item_complemento_tipoTocomplemento_tipo")
+  lista_complemento_tipo_lista_complemento_tipo_complemento_tipoTocomplemento_tipo        lista_complemento_tipo[] @relation("lista_complemento_tipo_complemento_tipoTocomplemento_tipo")
+}
+
+model cupom {
+  id_cupom                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  desconto                                               BigInt?
+  descricao                                              String?
+  estabelecimento                                        String?          @db.Uuid
+  tipo_cupom                                             String?          @db.Uuid
+  titulo                                                 String?
+  estabelecimento_cupom_estabelecimentoToestabelecimento estabelecimento? @relation("cupom_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  dominio                                                dominio?         @relation(fields: [tipo_cupom], references: [id_dominio], onDelete: NoAction)
+}
+
+model dominio {
+  id_dominio                                             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tipo                                                   String
+  nome                                                   String?
+  codigo                                                 String?
+  compra_avista                                          Decimal?                @db.Decimal
+  compra_aprazo                                          Decimal?                @db.Decimal
+  razao_social                                           String?
+  fone                                                   String?
+  email                                                  String?
+  desconto                                               Decimal?                @db.Decimal
+  foto                                                   String?
+  bandeira                                               String?
+  empresa                                                String?
+  tipo_pagamento                                         String?
+  carrinho_produto_carrinho_produto_dar_baixaTodominio   carrinho_produto[]      @relation("carrinho_produto_dar_baixaTodominio")
+  carrinho_produto_carrinho_produto_salvoTodominio       carrinho_produto[]      @relation("carrinho_produto_salvoTodominio")
+  categoria_categoria_deletadoTodominio                  categoria[]             @relation("categoria_deletadoTodominio")
+  categoria_categoria_destaqueTodominio                  categoria[]             @relation("categoria_destaqueTodominio")
+  complemento_item                                       complemento_item[]
+  complemento_tipo_complemento_tipo_deletadoTodominio    complemento_tipo[]      @relation("complemento_tipo_deletadoTodominio")
+  complemento_tipo_complemento_tipo_obrigatorioTodominio complemento_tipo[]      @relation("complemento_tipo_obrigatorioTodominio")
+  cupom                                                  cupom[]
+  endereco                                               endereco[]
+  estabelecimento_estabelecimento_bannerTodominio        estabelecimento[]       @relation("estabelecimento_bannerTodominio")
+  estabelecimento_estabelecimento_chatTodominio          estabelecimento[]       @relation("estabelecimento_chatTodominio")
+  estabelecimento_estabelecimento_status_planoTodominio  estabelecimento[]       @relation("estabelecimento_status_planoTodominio")
+  horario_funcionamento                                  horario_funcionamento[]
+  lista_forma_pagamento                                  lista_forma_pagamento[]
+  pedido_pedido_forma_pagamentoTodominio                 pedido[]                @relation("pedido_forma_pagamentoTodominio")
+  pedido_pedido_pedido_finalizadoTodominio               pedido[]                @relation("pedido_pedido_finalizadoTodominio")
+  plano                                                  plano[]
+  produto_produto_deletadoTodominio                      produto[]               @relation("produto_deletadoTodominio")
+  produto_produto_destaqueTodominio                      produto[]               @relation("produto_destaqueTodominio")
+  produto_produto_grupoTodominio                         produto[]               @relation("produto_grupoTodominio")
+  produto_produto_uni_medidaTodominio                    produto[]               @relation("produto_uni_medidaTodominio")
+  receber_pagar_receber_pagar_plano_contasTodominio      receber_pagar[]         @relation("receber_pagar_plano_contasTodominio")
+  receber_pagar_receber_pagar_tipoTodominio              receber_pagar[]         @relation("receber_pagar_tipoTodominio")
+  usuario_usuario_adminTodominio                         usuario[]               @relation("usuario_adminTodominio")
+  usuario_usuario_perfilTodominio                        usuario[]               @relation("usuario_perfilTodominio")
+  usuario_usuario_profissaoTodominio                     usuario[]               @relation("usuario_profissaoTodominio")
+}
+
+model endereco {
+  id_endereco                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lograduro                        String?
+  num                              String?
+  complemento                      String?
+  bairro                           String?
+  cidade                           String?
+  uf                               String?
+  cep                              String?
+  padrao                           String?  @db.Uuid
+  ponto_referencia                 String?
+  vinculo                          String?
+  nome                             String?
+  latitude                         String?
+  longitude                        String?
+  dominio                          dominio? @relation(fields: [padrao], references: [id_dominio], onDelete: NoAction)
+  pedido_pedido_enderecoToendereco pedido[] @relation("pedido_enderecoToendereco")
+}
+
+model estabelecimento {
+  id_estabelecimento                                                           String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  razao_social                                                                 String?
+  cpf_cnpj                                                                     String?
+  celular                                                                      String?
+  email                                                                        String?
+  banner                                                                       String?                 @db.Uuid
+  chat                                                                         String?                 @db.Uuid
+  vencimento_plano                                                             DateTime?               @db.Date
+  logo                                                                         String?
+  pedido_minimo                                                                BigInt?
+  status_plano                                                                 String?                 @db.Uuid
+  apelido                                                                      String?
+  descricao                                                                    String?
+  data_vencimento_plano                                                        DateTime?               @db.Date
+  plano                                                                        String?                 @db.Uuid
+  responsavel                                                                  String?                 @db.Uuid
+  tipo_categoria                                                               String?
+  alerta_alerta_estabelecimentoToestabelecimento                               alerta[]                @relation("alerta_estabelecimentoToestabelecimento")
+  area_entrega_area_entrega_estabelecimentoToestabelecimento                   area_entrega[]          @relation("area_entrega_estabelecimentoToestabelecimento")
+  aviso_aviso_estabelecimentoToestabelecimento                                 aviso[]                 @relation("aviso_estabelecimentoToestabelecimento")
+  categoria_categoria_estabelecimentoToestabelecimento                         categoria[]             @relation("categoria_estabelecimentoToestabelecimento")
+  cupom_cupom_estabelecimentoToestabelecimento                                 cupom[]                 @relation("cupom_estabelecimentoToestabelecimento")
+  dominio_estabelecimento_bannerTodominio                                      dominio?                @relation("estabelecimento_bannerTodominio", fields: [banner], references: [id_dominio], onDelete: NoAction)
+  dominio_estabelecimento_chatTodominio                                        dominio?                @relation("estabelecimento_chatTodominio", fields: [chat], references: [id_dominio], onDelete: NoAction)
+  plano_estabelecimento_planoToplano                                           plano?                  @relation("estabelecimento_planoToplano", fields: [plano], references: [id_plano], onDelete: NoAction)
+  usuario_estabelecimento_responsavelTousuario                                 usuario?                @relation("estabelecimento_responsavelTousuario", fields: [responsavel], references: [id_usuario], onDelete: NoAction)
+  dominio_estabelecimento_status_planoTodominio                                dominio?                @relation("estabelecimento_status_planoTodominio", fields: [status_plano], references: [id_dominio], onDelete: NoAction)
+  horario_funcionamento_horario_funcionamento_estabelecimentoToestabelecimento horario_funcionamento[] @relation("horario_funcionamento_estabelecimentoToestabelecimento")
+  lista_forma_pagamento_lista_forma_pagamento_estabelecimentoToestabelecimento lista_forma_pagamento[] @relation("lista_forma_pagamento_estabelecimentoToestabelecimento")
+  pedido_pedido_estabelecimentoToestabelecimento                               pedido[]                @relation("pedido_estabelecimentoToestabelecimento")
+  receber_pagar_receber_pagar_estabelecimentoToestabelecimento                 receber_pagar[]         @relation("receber_pagar_estabelecimentoToestabelecimento")
+  usuario_usuario_estabelecimentoToestabelecimento                             usuario[]               @relation("usuario_estabelecimentoToestabelecimento")
+}
+
+model horario_funcionamento {
+  id_horario_funcionamento                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  diaSemana                                                              String?          @db.Uuid
+  estabelecimento                                                        String?          @db.Uuid
+  horaAbre                                                               DateTime?        @db.Time(6)
+  horaFecha                                                              DateTime?        @db.Time(6)
+  dominio                                                                dominio?         @relation(fields: [diaSemana], references: [id_dominio], onDelete: NoAction, map: "horario_funcionamento_diasemana_fkey")
+  estabelecimento_horario_funcionamento_estabelecimentoToestabelecimento estabelecimento? @relation("horario_funcionamento_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+}
+
+model lista_carrinho_complemento {
+  id_lista_carrinho_complemento                                                              String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  carrinho_complemento                                                                       String?               @db.Uuid
+  carrinho_produto                                                                           String?               @db.Uuid
+  carrinho_complemento_lista_carrinho_complemento_carrinho_complementoTocarrinho_complemento carrinho_complemento? @relation("lista_carrinho_complemento_carrinho_complementoTocarrinho_complemento", fields: [carrinho_complemento], references: [id_carrinho_complemento], onDelete: NoAction)
+  carrinho_produto_lista_carrinho_complemento_carrinho_produtoTocarrinho_produto             carrinho_produto?     @relation("lista_carrinho_complemento_carrinho_produtoTocarrinho_produto", fields: [carrinho_produto], references: [id_carrinho_produto], onDelete: NoAction)
+}
+
+model lista_carrinho_produto {
+  id_lista_carrinho_produto                                                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  carrinho_produto                                                           String?           @db.Uuid
+  pedido                                                                     String?           @db.Uuid
+  carrinho_produto_lista_carrinho_produto_carrinho_produtoTocarrinho_produto carrinho_produto? @relation("lista_carrinho_produto_carrinho_produtoTocarrinho_produto", fields: [carrinho_produto], references: [id_carrinho_produto], onDelete: NoAction)
+  pedido_lista_carrinho_produto_pedidoTopedido                               pedido?           @relation("lista_carrinho_produto_pedidoTopedido", fields: [pedido], references: [id_pedido], onDelete: NoAction)
+  pedido_pedido_lista_carrinho_produtoTolista_carrinho_produto               pedido[]          @relation("pedido_lista_carrinho_produtoTolista_carrinho_produto")
+}
+
+model lista_complemento_item {
+  id_lista_complemento_item                                                         String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  complemento_tipo                                                                  String?            @db.Uuid
+  complemento_item                                                                  String?            @db.Uuid
+  complemento_tipo_complemento_tipo_lista_complemento_itensTolista_complemento_item complemento_tipo[] @relation("complemento_tipo_lista_complemento_itensTolista_complemento_item")
+  complemento_item_lista_complemento_item_complemento_itemTocomplemento_item        complemento_item?  @relation("lista_complemento_item_complemento_itemTocomplemento_item", fields: [complemento_item], references: [id_complemento_item], onDelete: NoAction)
+  complemento_tipo_lista_complemento_item_complemento_tipoTocomplemento_tipo        complemento_tipo?  @relation("lista_complemento_item_complemento_tipoTocomplemento_tipo", fields: [complemento_tipo], references: [id_complemento_tipo], onDelete: NoAction)
+}
+
+model lista_complemento_tipo {
+  id_lista_complemento_tipo                                                  String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  complemento_tipo                                                           String?           @db.Uuid
+  produto                                                                    String?           @db.Uuid
+  complemento_tipo_lista_complemento_tipo_complemento_tipoTocomplemento_tipo complemento_tipo? @relation("lista_complemento_tipo_complemento_tipoTocomplemento_tipo", fields: [complemento_tipo], references: [id_complemento_tipo], onDelete: NoAction)
+  produto_lista_complemento_tipo_produtoToproduto                            produto?          @relation("lista_complemento_tipo_produtoToproduto", fields: [produto], references: [id_produto], onDelete: NoAction)
+  produto_produto_lista_complemento_tipoTolista_complemento_tipo             produto[]         @relation("produto_lista_complemento_tipoTolista_complemento_tipo")
+}
+
+model lista_forma_pagamento {
+  id_lista_forma_pagamento                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  forma_pagamento                                                        String?          @db.Uuid
+  estabelecimento                                                        String?          @db.Uuid
+  estabelecimento_lista_forma_pagamento_estabelecimentoToestabelecimento estabelecimento? @relation("lista_forma_pagamento_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  dominio                                                                dominio?         @relation(fields: [forma_pagamento], references: [id_dominio], onDelete: NoAction)
+}
+
+model pedido {
+  id_pedido                                                                    String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cancelado                                                                    DateTime?                @db.Timestamp(6)
+  lista_carrinho_produto                                                       String?                  @db.Uuid
+  preparo                                                                      DateTime?                @db.Timestamp(6)
+  endereco                                                                     String?                  @db.Uuid
+  entregador                                                                   String?                  @db.Uuid
+  entregue                                                                     DateTime?                @db.Timestamp(6)
+  estabelecimento                                                              String?                  @db.Uuid
+  forma_pagamento                                                              String?                  @db.Uuid
+  pago                                                                         DateTime?                @db.Timestamp(6)
+  pedido_finalizado                                                            String?                  @db.Uuid
+  troco                                                                        Decimal?                 @db.Decimal
+  recebido                                                                     DateTime?                @db.Timestamp(6)
+  saiu_entrega                                                                 DateTime?                @db.Timestamp(6)
+  usuario                                                                      String?                  @db.Uuid
+  valor_produto                                                                Decimal?                 @db.Decimal
+  taxa_entrega                                                                 Decimal?                 @db.Decimal
+  valor_votal                                                                  Decimal?                 @db.Decimal
+  num                                                                          BigInt?
+  lista_carrinho_produto_lista_carrinho_produto_pedidoTopedido                 lista_carrinho_produto[] @relation("lista_carrinho_produto_pedidoTopedido")
+  endereco_pedido_enderecoToendereco                                           endereco?                @relation("pedido_enderecoToendereco", fields: [endereco], references: [id_endereco], onDelete: NoAction)
+  usuario_pedido_entregadorTousuario                                           usuario?                 @relation("pedido_entregadorTousuario", fields: [entregador], references: [id_usuario], onDelete: NoAction)
+  estabelecimento_pedido_estabelecimentoToestabelecimento                      estabelecimento?         @relation("pedido_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  dominio_pedido_forma_pagamentoTodominio                                      dominio?                 @relation("pedido_forma_pagamentoTodominio", fields: [forma_pagamento], references: [id_dominio], onDelete: NoAction)
+  lista_carrinho_produto_pedido_lista_carrinho_produtoTolista_carrinho_produto lista_carrinho_produto?  @relation("pedido_lista_carrinho_produtoTolista_carrinho_produto", fields: [lista_carrinho_produto], references: [id_lista_carrinho_produto], onDelete: NoAction)
+  dominio_pedido_pedido_finalizadoTodominio                                    dominio?                 @relation("pedido_pedido_finalizadoTodominio", fields: [pedido_finalizado], references: [id_dominio], onDelete: NoAction)
+  usuario_pedido_usuarioTousuario                                              usuario?                 @relation("pedido_usuarioTousuario", fields: [usuario], references: [id_usuario], onDelete: NoAction)
+}
+
+model plano {
+  id_plano                                     String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  titulo                                       String?
+  descricao                                    String?
+  valor                                        Decimal?          @db.Decimal
+  tipo                                         String?           @db.Uuid
+  estabelecimento_estabelecimento_planoToplano estabelecimento[] @relation("estabelecimento_planoToplano")
+  dominio                                      dominio?          @relation(fields: [tipo], references: [id_dominio], onDelete: NoAction)
+}
+
+model produto {
+  id_produto                                                                    String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoria                                                                     String?                  @db.Uuid
+  lista_complemento_tipo                                                        String?                  @db.Uuid
+  deletado                                                                      String?                  @db.Uuid
+  destaque                                                                      String?                  @db.Uuid
+  qtd_atual                                                                     BigInt?
+  qtd_minima                                                                    BigInt?
+  foto                                                                          String?
+  nome                                                                          String?
+  descricao                                                                     String?
+  valor_total                                                                   Decimal?                 @db.Decimal
+  cod_barras                                                                    String?
+  qr_code                                                                       String?
+  codido_produto                                                                BigInt?
+  fornecedor                                                                    String?                  @db.Uuid
+  grupo                                                                         String?                  @db.Uuid
+  uni_medida                                                                    String?                  @db.Uuid
+  custo_compra                                                                  Decimal?                 @db.Decimal
+  custo_medio                                                                   Decimal?                 @db.Decimal
+  ult_compra                                                                    DateTime?                @db.Date
+  ult_venda                                                                     DateTime?                @db.Date
+  comissao                                                                      BigInt?
+  peso                                                                          Float?                   @db.Real
+  carrinho_produto_carrinho_produto_produtoToproduto                            carrinho_produto[]       @relation("carrinho_produto_produtoToproduto")
+  complemento_tipo_complemento_tipo_produtoToproduto                            complemento_tipo[]       @relation("complemento_tipo_produtoToproduto")
+  lista_complemento_tipo_lista_complemento_tipo_produtoToproduto                lista_complemento_tipo[] @relation("lista_complemento_tipo_produtoToproduto")
+  categoria_produto_categoriaTocategoria                                        categoria?               @relation("produto_categoriaTocategoria", fields: [categoria], references: [id_categoria], onDelete: NoAction)
+  dominio_produto_deletadoTodominio                                             dominio?                 @relation("produto_deletadoTodominio", fields: [deletado], references: [id_dominio], onDelete: NoAction)
+  dominio_produto_destaqueTodominio                                             dominio?                 @relation("produto_destaqueTodominio", fields: [destaque], references: [id_dominio], onDelete: NoAction)
+  usuario                                                                       usuario?                 @relation(fields: [fornecedor], references: [id_usuario], onDelete: NoAction)
+  dominio_produto_grupoTodominio                                                dominio?                 @relation("produto_grupoTodominio", fields: [grupo], references: [id_dominio], onDelete: NoAction)
+  lista_complemento_tipo_produto_lista_complemento_tipoTolista_complemento_tipo lista_complemento_tipo?  @relation("produto_lista_complemento_tipoTolista_complemento_tipo", fields: [lista_complemento_tipo], references: [id_lista_complemento_tipo], onDelete: NoAction)
+  dominio_produto_uni_medidaTodominio                                           dominio?                 @relation("produto_uni_medidaTodominio", fields: [uni_medida], references: [id_dominio], onDelete: NoAction)
+}
+
+model receber_pagar {
+  id_receber_pagar                                               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  historico                                                      String?
+  plano_contas                                                   String?          @db.Uuid
+  documento                                                      String?
+  cliente                                                        String?          @db.Uuid
+  emissao                                                        DateTime?        @db.Date
+  vencimento                                                     DateTime?        @db.Date
+  valor_atual                                                    Decimal?         @db.Decimal
+  data_pago_recebido                                             DateTime?        @db.Date
+  valor_pago_recebido                                            Decimal?         @db.Decimal
+  saldo                                                          Decimal?         @db.Decimal
+  tipo                                                           String?          @db.Uuid
+  estabelecimento                                                String?          @db.Uuid
+  usuario                                                        usuario?         @relation(fields: [cliente], references: [id_usuario], onDelete: NoAction)
+  estabelecimento_receber_pagar_estabelecimentoToestabelecimento estabelecimento? @relation("receber_pagar_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  dominio_receber_pagar_plano_contasTodominio                    dominio?         @relation("receber_pagar_plano_contasTodominio", fields: [plano_contas], references: [id_dominio], onDelete: NoAction)
+  dominio_receber_pagar_tipoTodominio                            dominio?         @relation("receber_pagar_tipoTodominio", fields: [tipo], references: [id_dominio], onDelete: NoAction)
+}
+
+model tipo_categoria {
+  id_tipo_categoria                                  String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nome                                               String
+  categoria_categoria_tipo_categoriaTotipo_categoria categoria[] @relation("categoria_tipo_categoriaTotipo_categoria")
+}
+
+model usuario {
+  id_usuario                                               String             @id(map: "usuarioa_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  admin                                                    String?            @db.Uuid
+  nome                                                     String?
+  perfil                                                   String?            @db.Uuid
+  cpf_cnpj                                                 String?
+  celular                                                  String?
+  email                                                    String?            @unique
+  senha                                                    String?
+  niver                                                    DateTime?          @db.Date
+  estabelecimento                                          String?            @db.Uuid
+  apelido                                                  String?
+  lim_credito                                              Decimal?           @db.Decimal
+  profissao                                                String?            @db.Uuid
+  carrinho_produto                                         carrinho_produto[]
+  estabelecimento_estabelecimento_responsavelTousuario     estabelecimento[]  @relation("estabelecimento_responsavelTousuario")
+  pedido_pedido_entregadorTousuario                        pedido[]           @relation("pedido_entregadorTousuario")
+  pedido_pedido_usuarioTousuario                           pedido[]           @relation("pedido_usuarioTousuario")
+  produto                                                  produto[]
+  receber_pagar                                            receber_pagar[]
+  dominio_usuario_adminTodominio                           dominio?           @relation("usuario_adminTodominio", fields: [admin], references: [id_dominio], onDelete: NoAction)
+  estabelecimento_usuario_estabelecimentoToestabelecimento estabelecimento?   @relation("usuario_estabelecimentoToestabelecimento", fields: [estabelecimento], references: [id_estabelecimento], onDelete: NoAction)
+  dominio_usuario_perfilTodominio                          dominio?           @relation("usuario_perfilTodominio", fields: [perfil], references: [id_dominio], onDelete: NoAction)
+  dominio_usuario_profissaoTodominio                       dominio?           @relation("usuario_profissaoTodominio", fields: [profissao], references: [id_dominio], onDelete: NoAction)
+}

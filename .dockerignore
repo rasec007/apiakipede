@@ -1,0 +1,13 @@
+node_modules
+npm-debug.log
+.env
+.git
+.gitignore
+Dockerfile
+README.md
+.gemini
+brain
+apiakipede
+**/node_modules
+dist
+build
